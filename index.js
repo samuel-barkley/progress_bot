@@ -1,28 +1,46 @@
 const { REST } = require('@discordjs/rest');
+const { SlashCommandBuilder } = require('@discordjs/builders');
 const { Routes } = require('discord-api-types/v9');
-const { token } = require('./config.json');
+const { token, clientId, guildId } = require('./config.json');
+const { Client, Intents } = require('discord.js');
+const fs = require('fs');
 
-const commands = [{
-  name: 'ping',
-  description: 'Replies with Pong!'
-}]; 
+let rawdata = fs.readFileSync('goals.json');
+let goals = JSON.parse(rawdata);
 
-const CLIENT_ID = 982010725876781160;
-const GUILD_ID = 234;
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES,] })
+const prefix = '+'
 
-const rest = new REST({ version: '9' }).setToken('token');
+client.once('ready', () => {
+  console.log('Ready!');
+});
 
-(async () => {
-  try {
-    console.log('Started refreshing application (/) commands.');
+client.on("messageCreate", (message) => {
+  if (message.content.startsWith(prefix)) {
+    var command = message.content.substring(prefix.length).split(" ");
 
-    await rest.put(
-      Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID),
-      { body: commands },
-    );
-
-    console.log('Successfully reloaded application (/) commands.');
-  } catch (error) {
-    console.error(error);
+    if (command[0] == "ping") {
+      message.channel.send("pong");
+    }
+    if (command[0] == "add") {
+      if (command.length == 3) {
+        if (isNaN(Number(command[2]))) {
+          message.channel.send(command[2] + ", is not a number.")
+        } else {
+          goals.push({ name: command[1] })
+          Save(goals);
+          message.channel.send(command[2] + ", added to progress meter.")
+        }
+      } else {
+        message.channel.send(`Add format is incorrect. Format is \`${prefix}add <goal> <amount>\``)
+      }
+    }
   }
-})();
+});
+
+client.login(token);
+
+function Save(data) {
+  rawData = JSON.stringify(data)
+  fs.writeFileSync('goals.json', rawData);
+}
