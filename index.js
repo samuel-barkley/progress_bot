@@ -71,6 +71,7 @@ client.on("messageCreate", (message) => {
         }
         break;
       default:
+        message.channel.send("Invalid request.");
         break;
     }
   }
