@@ -1,6 +1,3 @@
-const { REST } = require('@discordjs/rest');
-const { SlashCommandBuilder } = require('@discordjs/builders');
-const { Routes } = require('discord-api-types/v9');
 const { token, clientId, guildId } = require('./config.json');
 const { Client, Intents } = require('discord.js');
 const fs = require('fs');
@@ -46,7 +43,7 @@ client.on("messageCreate", (message) => {
         break;
       case "create":
         if (ValidateCreate(command, goals, prefix, message)) {
-          goals.push({ goal: command[1], goalAmount: command[2] })
+          goals.push({ goal: command[1], progress: 0, goalAmount: command[2] })
           Save(goals)
           message.channel.send(`Goal created.`);
         }
@@ -62,6 +59,15 @@ client.on("messageCreate", (message) => {
         if (ValidateProgress(command, goals, prefix, message)) {
           let goal = goals.find(obj => obj.goal == command[1])
           message.channel.send(`${goal.goal}: ${goal.progress} / ${goal.goalAmount}`);
+        }
+        break;
+      case "list":
+        if (ValidateList(command, goals, prefix, message)) {
+          let messageString = "";
+          for (let i = 0; i < goals.length; i++) {
+            messageString += `${goals[i].goal}: ${goals[i].progress} / ${goals[i].goalAmount} \n`;
+          }
+          message.channel.send(messageString)
         }
         break;
       default:
@@ -112,4 +118,12 @@ function ValidateProgress(command, goals, prefix, message) {
       return true;
     } else message.channel.send(`The goal doesn't exist.`); return false;
   } else message.channel.send(`Progress format is incorrect. Format is \`${prefix}progress <goal>\``); return false;
+}
+
+function ValidateList(command, goals, prefix, message) {
+if (command.length == 1) {
+  if (goals.length != 0) {
+    return true;
+  } else message.channel.send(`There are no goals at the moment. Create a goal with the following command \`${prefix}create <goal> <amount>\``); return false;
+} else message.channel.send(`Progress format is incorrect. Format is \`${prefix}list\``); return false;
 }
