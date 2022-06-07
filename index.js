@@ -58,14 +58,14 @@ client.on("messageCreate", (message) => {
       case "progress":
         if (ValidateProgress(command, goals, prefix, message)) {
           let goal = goals.find(obj => obj.goal == command[1])
-          message.channel.send(`${goal.goal}: ${goal.progress} / ${goal.goalAmount}`);
+          message.channel.send(`${goal.goal}: ${NumberWithCommas(goal.progress)} / ${NumberWithCommas(goal.goalAmount)}`);
         }
         break;
       case "list":
         if (ValidateList(command, goals, prefix, message)) {
           let messageString = "";
           for (let i = 0; i < goals.length; i++) {
-            messageString += `${goals[i].goal}: ${goals[i].progress} / ${goals[i].goalAmount} \n`;
+            messageString += `${goals[i].goal}: ${NumberWithCommas(goals[i].progress)} / ${NumberWithCommas(goals[i].goalAmount)} \n`;
           }
           message.channel.send(messageString)
         }
@@ -101,7 +101,7 @@ function ValidateCreate(command, goals, prefix, message) {
         return true;
       } else message.channel.send(`A goal with the name of ${command[1]} already exists. Use a different name or remove the existing one with \`${prefix}remove <goal>\``); return false;
     } else message.channel.send(`${command[2]} is not a number. <amount> must be a number`); return false;
-  } else message.channel.send(`Create format is incorrect. Format is \`${prefix}add <goal> <amount>\``); return false;
+  } else message.channel.send(`Create format is incorrect. Format is \`${prefix}create <goal> <amount>\``); return false;
 }
 
 function ValidateRemove(command, goals, prefix, message) {
@@ -122,9 +122,13 @@ function ValidateProgress(command, goals, prefix, message) {
 }
 
 function ValidateList(command, goals, prefix, message) {
-if (command.length == 1) {
-  if (goals.length != 0) {
-    return true;
-  } else message.channel.send(`There are no goals at the moment. Create a goal with the following command \`${prefix}create <goal> <amount>\``); return false;
-} else message.channel.send(`Progress format is incorrect. Format is \`${prefix}list\``); return false;
+  if (command.length == 1) {
+    if (goals.length != 0) {
+      return true;
+    } else message.channel.send(`There are no goals at the moment. Create a goal with the following command \`${prefix}create <goal> <amount>\``); return false;
+  } else message.channel.send(`Progress format is incorrect. Format is \`${prefix}list\``); return false;
+}
+
+function NumberWithCommas(x) {
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
