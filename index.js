@@ -50,8 +50,8 @@ client.on("messageCreate", (message) => {
         break;
       case "remove":
         if (ValidateRemove(command, goals, prefix, message)) {
-          newGoals = goals.filter(data => data.goal != command[1]);
-          Save(newGoals);
+          goals = goals.filter(data => data.goal != command[1]);
+          Save(goals);
           message.channel.send(`Goal has been removed`);
         }
         break;
